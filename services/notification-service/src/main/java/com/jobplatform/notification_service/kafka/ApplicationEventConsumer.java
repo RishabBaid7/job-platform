@@ -6,6 +6,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 import com.jobplatform.notification_service.entity.ProcessedEvent;
+import com.jobplatform.notification_service.event.ApplicationCreatedEvent;
 import com.jobplatform.notification_service.repository.ProcessedEventRepository;
 
 @Component
@@ -17,12 +18,11 @@ public class ApplicationEventConsumer {
         this.processedEventRepository = processedEventRepository;
     }
 
-    @SuppressWarnings("null")
     @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 2000))
     @KafkaListener(topics = "application.created", groupId = "notification-group") 
-    public void consume(String message) {
-        // String eventId = event.getEventId();
-        String eventId = message; 
+    public void consume(ApplicationCreatedEvent event) {
+        String eventId = event.getEventId();
+        // String eventId = message; 
 
         if(processedEventRepository.existsById(eventId)) {
             System.out.println("Duplicate event ignored: " + eventId);
@@ -30,6 +30,9 @@ public class ApplicationEventConsumer {
         }
 
         System.out.println("Processing application event:" + eventId);
+        System.out.println("Application ID: " + event.getApplicationId());
+        System.out.println("User ID: " + event.getUserId());
+        System.out.println("Job ID: " + event.getJobId());
         
         processedEventRepository.save(new ProcessedEvent(eventId));
     }
