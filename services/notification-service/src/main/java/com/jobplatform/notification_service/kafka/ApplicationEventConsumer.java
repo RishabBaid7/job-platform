@@ -18,6 +18,7 @@ public class ApplicationEventConsumer {
         this.processedEventRepository = processedEventRepository;
     }
 
+    @SuppressWarnings("null")
     @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 2000))
     @KafkaListener(topics = "application.created", groupId = "notification-group") 
     public void consume(ApplicationCreatedEvent event) {
