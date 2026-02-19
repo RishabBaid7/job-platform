@@ -20,6 +20,7 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    @SuppressWarnings("null")
     @PostMapping("/register")
     public UserAuth register(@RequestBody UserAuth user) {
         return repository.save(user);
