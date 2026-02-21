@@ -20,6 +20,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             String path = exchange.getRequest().getURI().getPath();
+            String method = exchange.getRequest().getMethod().name();
 
             // Allow auth endpoints
             if (path.contains("/auth")) {
@@ -41,6 +42,20 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             if (!jwtUtil.validateToken(token)) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
+            }
+            String role = jwtUtil.extractRole(token);
+            //Role-based checks
+            if (path.startsWith("/jobs") && method.equals("POST")) {
+                if (!"RECRUITER".equals(role)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                    return exchange.getResponse().setComplete();
+                }
+            }
+            if (path.startsWith("/applications") && method.equals("POST")) {
+                if (!"CANDIDATE".equals(role)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                    return exchange.getResponse().setComplete();
+                }
             }
             return chain.filter(exchange);
         };
