@@ -1,3 +1,21 @@
+## Kafka-Based Job Platform
+A production-style microservices job application platform built using Spring Boot, Kafka, and Docker.
+The system demonstrates event-driven architecture, centralized security, service discovery, and containerized deployment.
+
+## Key Features
+JWT-based authentication and authorization
+API Gateway with centralized routing
+Event-driven communication using Kafka
+Retry + Dead Letter Queue (DLQ) handling
+Idempotent Kafka consumer (duplicate protection)
+Service discovery with Eureka
+Fully containerized with Docker Compose
+Role-Based Access Control (RBA)
+Scalable microservices architecture
+
+## Running the Project (One Command)
+docker compose up --build
+
 ## 🏗️ System Architecture
 
 ```mermaid
