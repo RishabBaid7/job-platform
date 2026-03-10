@@ -1,5 +1,13 @@
-FROM eclipse-temurin:17-jdk-jammy
+# Stage 1: Build
+FROM eclipse-temurin:17-jdk-jammy AS builder
 WORKDIR /app
-COPY target/service-registry-0.0.1-SNAPSHOT.jar app.jar
+COPY pom.xml .
+COPY src ./src
+RUN apt-get update && apt-get install -y maven && mvn package -DskipTests
+
+# Stage 2: Run
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=builder /app/target/service-registry-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8761
 ENTRYPOINT ["java", "-jar", "app.jar"]

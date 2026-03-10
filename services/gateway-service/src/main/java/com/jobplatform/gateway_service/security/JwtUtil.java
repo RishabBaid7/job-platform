@@ -2,6 +2,7 @@ package com.jobplatform.gateway_service.security;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -10,9 +11,12 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET = "my-very-secret-key-that-is-long-enough";
+
+    @Value("${jwt.secret}")
+    private String secret;
+
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public boolean validateToken(String token) {
@@ -23,6 +27,7 @@ public class JwtUtil {
             return false;
         }
     }
+
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -30,6 +35,11 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String extractEmail(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }

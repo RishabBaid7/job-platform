@@ -1,16 +1,13 @@
-# Use lightweight JDK
-# It pulls a lightweight Alpine Linux image that has JDK 17 pre-installed. 
-FROM eclipse-temurin:17-jdk-jammy 
-
-# Set working directory
-# Sets the working directory inside the container to /app
+# Stage 1: Build
+FROM eclipse-temurin:17-jdk-jammy AS builder
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN apt-get update && apt-get install -y maven && mvn package -DskipTests
 
-# Copy jar from target
-COPY target/auth-service-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose port
+# Stage 2: Run
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+COPY --from=builder /app/target/auth-service-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8085
-
-# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]

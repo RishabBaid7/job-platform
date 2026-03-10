@@ -50,12 +50,15 @@ services:
       - "8085:8085"
     depends_on:
       - postgres
+      - kafka
       - service-registry
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobdb
       SPRING_DATASOURCE_USERNAME: jobuser
       SPRING_DATASOURCE_PASSWORD: jobpass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka
+      JWT_SECRET: ${JWT_SECRET:-my-very-secret-key-that-is-long-enough-for-hs256-algo}
 
   user-service:
     build:
@@ -66,11 +69,13 @@ services:
       - "8081:8081"
     depends_on:
       - postgres
+      - kafka
       - service-registry
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobdb
       SPRING_DATASOURCE_USERNAME: jobuser
       SPRING_DATASOURCE_PASSWORD: jobpass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka
 
   job-service:
@@ -84,7 +89,7 @@ services:
       - postgres
       - kafka
       - service-registry
-    environment: 
+    environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobdb
       SPRING_DATASOURCE_USERNAME: jobuser
       SPRING_DATASOURCE_PASSWORD: jobpass
@@ -94,7 +99,7 @@ services:
   application-service:
     build:
       context: ./services/application-service
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
     container_name: application-service
     ports:
       - "8083:8083"
@@ -126,6 +131,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: jobpass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-your-email@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-your-app-password}
 
   gateway-service:
     build:
@@ -142,3 +151,4 @@ services:
       - application-service
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka
+      JWT_SECRET: ${JWT_SECRET:-my-very-secret-key-that-is-long-enough-for-hs256-algo}

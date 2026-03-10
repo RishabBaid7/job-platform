@@ -1,0 +1,13 @@
+# Frontend (not part of backend repo)
+job-platform-ui/
+
+# Maven build output
+**/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
