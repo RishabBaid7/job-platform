@@ -22,7 +22,12 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<Job> createJob(@Valid @RequestBody Job job) {
+    public ResponseEntity<Job> createJob(
+            @Valid @RequestBody Job job,
+            @RequestHeader(value = "X-User-Email", required = false) String userEmail) {
+        if (userEmail != null) {
+            job.setPostedByEmail(userEmail);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(jobService.createJob(job));
     }
 

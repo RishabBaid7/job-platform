@@ -1,4 +1,4 @@
-package com.jobplatform.job_service.event;
+package com.jobplatform.notification_service.event;
 
 import lombok.*;
 import java.time.LocalDateTime;

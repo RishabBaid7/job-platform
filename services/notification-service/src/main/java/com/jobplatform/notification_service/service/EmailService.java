@@ -1,5 +1,7 @@
 package com.jobplatform.notification_service.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -31,8 +35,9 @@ public class EmailService {
                 "Best regards,\nJob Platform Team"
             );
             mailSender.send(message);
+            log.info("Application confirmation sent to {} for application {}", toEmail, applicationId);
         } catch (MailException e) {
-            System.err.println("Failed to send email to " + toEmail + ": " + e.getMessage());
+            log.error("Failed to send application confirmation to {}: {}", toEmail, e.getMessage());
         }
     }
 
@@ -48,8 +53,31 @@ public class EmailService {
                 "Best regards,\nJob Platform Team"
             );
             mailSender.send(message);
+            log.info("Status update email sent to {} for application {} -> {}", toEmail, applicationId, newStatus);
         } catch (MailException e) {
-            System.err.println("Failed to send status email to " + toEmail + ": " + e.getMessage());
+            log.error("Failed to send status update email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    public void sendJobPostedConfirmation(String toEmail, Long jobId, String title, String companyName) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Job Posted Successfully - Job Platform");
+            message.setText(
+                "Hi,\n\n" +
+                "Your job posting has been published successfully.\n\n" +
+                "Job ID: " + jobId + "\n" +
+                "Title: " + title + "\n" +
+                "Company: " + companyName + "\n\n" +
+                "Candidates can now apply for this position.\n\n" +
+                "Best regards,\nJob Platform Team"
+            );
+            mailSender.send(message);
+            log.info("Job posted confirmation sent to {} for job {}", toEmail, jobId);
+        } catch (MailException e) {
+            log.error("Failed to send job posted confirmation to {}: {}", toEmail, e.getMessage());
         }
     }
 }

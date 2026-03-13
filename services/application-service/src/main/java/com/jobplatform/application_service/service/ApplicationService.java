@@ -2,6 +2,7 @@ package com.jobplatform.application_service.service;
 
 import com.jobplatform.application_service.entity.Application;
 import com.jobplatform.application_service.event.ApplicationCreatedEvent;
+import com.jobplatform.application_service.event.ApplicationStatusUpdatedEvent;
 import com.jobplatform.application_service.kafka.ApplicationEventProducer;
 import com.jobplatform.application_service.repository.ApplicationRepository;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,17 @@ public class ApplicationService {
         Application application = applicationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Application not found with id: " + id));
         application.setStatus(status);
-        return applicationRepository.save(application);
+        Application saved = applicationRepository.save(application);
+
+        eventProducer.sendApplicationStatusUpdatedEvent(ApplicationStatusUpdatedEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .applicationId(saved.getId())
+                .userId(saved.getUserId())
+                .userEmail(saved.getUserEmail())
+                .newStatus(status)
+                .timestamp(LocalDateTime.now())
+                .build());
+
+        return saved;
     }
 }

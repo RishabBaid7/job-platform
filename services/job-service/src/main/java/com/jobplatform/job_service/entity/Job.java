@@ -39,4 +39,6 @@ public class Job {
     private Double salary;
 
     private LocalDateTime createdAt;
+
+    private String postedByEmail;
 }

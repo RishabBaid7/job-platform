@@ -4,11 +4,15 @@ import com.jobplatform.job_service.entity.Job;
 import com.jobplatform.job_service.event.JobCreatedEvent;
 import com.jobplatform.job_service.kafka.JobEventProducer;
 import com.jobplatform.job_service.repository.JobRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +38,7 @@ public class JobService {
                 .companyName(saved.getCompanyName())
                 .location(saved.getLocation())
                 .salary(saved.getSalary())
+                .postedByEmail(saved.getPostedByEmail())
                 .timestamp(LocalDateTime.now())
                 .build());
 
@@ -41,7 +46,23 @@ public class JobService {
     }
 
     public Page<Job> getAllJobs(String title, String location, Double minSalary, Double maxSalary, Pageable pageable) {
-        return jobRepository.search(title, location, minSalary, maxSalary, pageable);
+        Specification<Job> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (title != null && !title.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
+            }
+            if (location != null && !location.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase() + "%"));
+            }
+            if (minSalary != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("salary"), minSalary));
+            }
+            if (maxSalary != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("salary"), maxSalary));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return jobRepository.findAll(spec, pageable);
     }
 
     public Optional<Job> getJobById(Long id) {

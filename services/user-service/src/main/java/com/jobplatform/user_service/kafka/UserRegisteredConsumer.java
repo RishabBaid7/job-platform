@@ -20,8 +20,11 @@ public class UserRegisteredConsumer {
         if (userRepository.existsByEmail(event.getEmail())) {
             return;
         }
+        String name = (event.getName() != null && !event.getName().isBlank())
+                ? event.getName()
+                : event.getEmail().split("@")[0];
         User user = User.builder()
-                .name(event.getEmail())
+                .name(name)
                 .email(event.getEmail())
                 .role(event.getRole())
                 .build();
